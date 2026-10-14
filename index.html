@@ -111,13 +111,20 @@
     .skeleton{height:300px;border-radius:var(--radius);background:linear-gradient(90deg,#e7eef6 25%,#f3f7fb 50%,#e7eef6 75%);background-size:200% 100%;animation:sh 1.3s infinite}
     @keyframes sh{to{background-position:-200% 0}}
 
-    /* ---------- Admin Table ---------- */
-    .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95rem; background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    /* ---------- Admin UI ---------- */
+    .admin-tabs { display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid var(--sky-line); padding-bottom:10px; overflow-x:auto; }
+    .admin-tab { padding:8px 16px; border:none; background:transparent; font-weight:600; color:var(--muted); cursor:pointer; font-size:1.05rem; white-space:nowrap; }
+    .admin-tab.active { color:var(--navy); border-bottom:3px solid var(--blue); }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .admin-table th, .admin-table td { padding: 12px 14px; border-bottom: 1px solid var(--sky-line); text-align: right; }
     .admin-table th { background: var(--sky); font-weight: 700; color: var(--navy); white-space: nowrap; }
     .admin-table tr:hover { background: #fafcff; }
     .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .table-img { width: 50px; height: 50px; object-fit: contain; background: var(--sky); border-radius: 8px; padding: 4px; }
+    
+    .settings-form { background:#fff; padding:20px; border-radius:var(--radius); border:1px solid var(--sky-line); max-width:800px; }
+    .settings-form h3 { margin-top:30px; margin-bottom:15px; color:var(--navy); border-bottom:2px solid var(--sky); padding-bottom:5px; }
+    .settings-form h3:first-child { margin-top:0; }
 
     /* ---------- Cart drawer ---------- */
     .overlay{position:fixed;inset:0;background:rgba(7,28,54,.55);z-index:55;opacity:0;visibility:hidden;transition:opacity .2s}
@@ -259,29 +266,68 @@
 
   <!-- אזור הניהול -->
   <div id="adminView" style="display:none;">
-    <h1>ניהול חנות</h1>
-    <p class="cat-desc">כאן ניתן לנהל ולערוך את המוצרים המוצגים באתר.</p>
-    
-    <div class="toolbar" style="margin-top:20px; flex-wrap:wrap;">
-      <button class="btn" id="adminAddBtn" style="width:auto; display:inline-flex;">+ הוספת מוצר חדש</button>
-      <button class="btn btn-ghost" id="adminBackBtn" style="width:auto; display:inline-flex;">חזרה לחנות</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>ניהול חנות</h1>
+      <button class="btn btn-ghost" id="adminBackBtn" style="width:auto;">חזרה לחנות</button>
     </div>
     
-    <div style="overflow-x:auto;">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>תמונה</th>
-            <th>שם מוצר</th>
-            <th>מחיר רגיל</th>
-            <th>מבצע</th>
-            <th>מלאי?</th>
-            <th>פעולות</th>
-          </tr>
-        </thead>
-        <tbody id="adminTbody"></tbody>
-      </table>
+    <!-- כרטיסיות ניהול -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="products">ניהול מוצרים</button>
+      <button class="admin-tab" data-tab="categories">ניהול קטגוריות</button>
+      <button class="admin-tab" data-tab="settings">הגדרות אתר ותקנונים</button>
     </div>
+    
+    <!-- טאב מוצרים -->
+    <div id="adminTab-products" class="admin-tab-content">
+      <button class="btn" id="adminAddBtn" style="width:auto; display:inline-flex; margin-bottom:15px;">+ הוספת מוצר חדש</button>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr><th>תמונה</th><th>שם מוצר</th><th>מחיר רגיל</th><th>מבצע</th><th>מלאי?</th><th>פעולות</th></tr>
+          </thead>
+          <tbody id="adminTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- טאב קטגוריות -->
+    <div id="adminTab-categories" class="admin-tab-content" style="display:none;">
+      <button class="btn" id="adminAddCatBtn" style="width:auto; display:inline-flex; margin-bottom:15px;">+ הוספת קטגוריה חדשה</button>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr><th>שם קטגוריה</th><th>שורת כתובת (Slug)</th><th>סדר</th><th>פעולות</th></tr>
+          </thead>
+          <tbody id="adminCatTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- טאב הגדרות -->
+    <div id="adminTab-settings" class="admin-tab-content" style="display:none;">
+      <form id="adminSettingsForm" class="settings-form">
+        <h3>פרטים כלליים ויצירת קשר</h3>
+        <div class="field"><label>שם החנות</label><input type="text" name="store_name" id="set_store_name"></div>
+        <div class="field"><label>טלפון חנות</label><input type="text" name="store_phone" id="set_store_phone"></div>
+        <div class="field"><label>כתובת החנות</label><input type="text" name="store_address" id="set_store_address"></div>
+        <div class="field"><label>שעות פעילות</label><textarea name="opening_hours" id="set_opening_hours" rows="2"></textarea></div>
+        
+        <h3>הזמנות ומנהלים</h3>
+        <div class="field"><label>מייל לקבלת עדכוני הזמנות</label><input type="email" name="order_email" id="set_order_email"></div>
+        <div class="field"><label>מספר וואטסאפ ללקוחות (לדוגמה: 0501234567)</label><input type="text" name="whatsapp_number" id="set_whatsapp_number"></div>
+        
+        <h3>מדיניות ותקנונים (יופיעו בחלונות קופצים למטה)</h3>
+        <div class="field"><label>מדיניות משלוחים</label><textarea name="shipping_policy" id="set_shipping_policy" rows="4"></textarea></div>
+        <div class="field"><label>מדיניות החזרות</label><textarea name="return_policy" id="set_return_policy" rows="4"></textarea></div>
+        <div class="field"><label>תקנון האתר</label><textarea name="terms" id="set_terms" rows="4"></textarea></div>
+
+        <div class="actions" style="margin-top:20px;">
+          <button class="btn" type="submit" id="adminSaveSettingsBtn">שמירת הגדרות</button>
+        </div>
+      </form>
+    </div>
+
   </div>
 </main>
 
@@ -329,13 +375,11 @@
   </div>
 
   <div class="drawer-body">
-    <!-- שלב 1: העגלה -->
     <div class="step step-cart">
       <ul class="cart-list" id="cartList"></ul>
       <p class="state" id="cartEmpty" hidden>העגלה ריקה.<br>הוסיפו מוצרים כדי להתחיל.</p>
     </div>
 
-    <!-- שלב 2: פרטי לקוח -->
     <div class="step step-checkout">
       <form id="checkoutForm" novalidate>
         <div class="field"><label for="f_name">שם מלא *</label><input id="f_name" name="name" required autocomplete="name"></div>
@@ -351,7 +395,6 @@
       </form>
     </div>
 
-    <!-- שלב 3: סיום -->
     <div class="step step-done">
       <div class="done-box">
         <div class="check" aria-hidden="true">✓</div>
@@ -370,7 +413,7 @@
   </div>
 </aside>
 
-<!-- חלון עריכת/הוספת מוצר לניהול -->
+<!-- חלון עריכת מוצר -->
 <dialog id="adminProductDialog" aria-labelledby="adminProdTitle">
   <div class="dlg-head"><h2 id="adminProdTitle">עריכת מוצר</h2>
     <button class="icon-btn" data-close aria-label="סגור"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
@@ -379,15 +422,7 @@
       <input type="hidden" name="id" id="ap_id">
       <div class="field"><label>שם מוצר *</label><input type="text" name="name" id="ap_name" required></div>
       <div class="field"><label>תיאור מוצר (אופציונלי)</label><textarea name="description" id="ap_desc" rows="2"></textarea></div>
-      
-      <!-- בחירת קטגוריה -->
-      <div class="field">
-        <label>קטגוריה</label>
-        <select name="category_id" id="ap_category">
-          <option value="">ללא קטגוריה</option>
-        </select>
-      </div>
-
+      <div class="field"><label>קטגוריה</label><select name="category_id" id="ap_category"><option value="">ללא קטגוריה</option></select></div>
       <div class="field"><label>מחיר רגיל (₪) *</label><input type="number" name="price" id="ap_price" step="0.01" required></div>
       <div class="field"><label>מחיר מבצע (₪) (השאר ריק אם אין מבצע)</label><input type="number" name="sale_price" id="ap_sale_price" step="0.01"></div>
       <div class="field"><label>קישור לתמונה (URL מ-Storage)</label><input type="url" name="image_url" id="ap_image_url"></div>
@@ -396,6 +431,24 @@
       </div>
       <div class="actions" style="margin-top:15px;">
         <button class="btn" type="submit" id="adminSaveBtn">שמירת מוצר</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- חלון עריכת קטגוריה -->
+<dialog id="adminCatDialog" aria-labelledby="adminCatTitle">
+  <div class="dlg-head"><h2 id="adminCatTitle">עריכת קטגוריה</h2>
+    <button class="icon-btn" data-close aria-label="סגור"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="dlg-body">
+    <form id="adminCatForm">
+      <input type="hidden" name="id" id="ac_id">
+      <div class="field"><label>שם הקטגוריה * (לדוגמה: מטענים)</label><input type="text" name="name" id="ac_name" required></div>
+      <div class="field"><label>שורת כתובת באנגלית * (לדוגמה: chargers)</label><input type="text" name="slug" id="ac_slug" required></div>
+      <div class="field"><label>תיאור לקטגוריה</label><textarea name="description" id="ac_desc" rows="2"></textarea></div>
+      <div class="field"><label>סדר תצוגה (מספר, למשל 1, 2, 3)</label><input type="number" name="sort_order" id="ac_sort"></div>
+      <div class="actions" style="margin-top:15px;">
+        <button class="btn" type="submit" id="adminSaveCatBtn">שמירת קטגוריה</button>
       </div>
     </form>
   </div>
@@ -481,7 +534,7 @@
 
   /* ============ קטגוריות + ניווט ============ */
   async function loadCategories() {
-    const { data } = await db.from('categories').select('id,name,slug,description')
+    const { data } = await db.from('categories').select('id,name,slug,description,sort_order')
       .eq('is_active', true).order('sort_order').order('name');
     state.categories = data || [];
     const links = [{ name: 'כל המוצרים', slug: '' }, ...state.categories];
@@ -490,7 +543,6 @@
     $('#footLinks').innerHTML = '<li><a href="./">כל המוצרים</a></li>' + state.categories.map(c =>
       `<li><a href="?cat=${encodeURIComponent(c.slug)}">${esc(c.name)}</a></li>`).join('');
     
-    // אכלוס סלקט בחלון מנהל
     $('#ap_category').innerHTML = '<option value="">ללא קטגוריה</option>' + state.categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
   }
 
@@ -640,7 +692,6 @@
       '',
       `שם: ${c.name}`,
       `טלפון: ${c.phone}`,
-      `מייל: ${c.email || '—'}`,
       `כתובת: ${c.address}`,
       c.notes ? `הערות: ${c.notes}` : null,
       '',
@@ -655,17 +706,10 @@
     const s = state.settings;
     $('#doneInfo').textContent = `מספר הזמנה ${order.out_order_number} · סה״כ ${money(order.out_total)}`;
     const btns = [];
-
     const wa = waNumber(s.whatsapp_number);
     if (isOn(s.whatsapp_enabled) && wa) {
       const url = `https://wa.me/${wa}?text=${encodeURIComponent(buildWhatsAppMessage(order, c, items))}`;
       btns.push(`<a class="btn btn-wa" href="${esc(url)}" target="_blank" rel="noopener">שליחת ההזמנה בוואטסאפ</a>`);
-    }
-    if (isOn(s.payment_enabled) && safeUrl(s.payment_url)) {
-      btns.push(`<a class="btn btn-pay" href="${esc(safeUrl(s.payment_url))}" target="_blank" rel="noopener">${esc(s.payment_label || 'תשלום בכרטיס אשראי')}</a>`);
-    }
-    if (isOn(s.bit_enabled) && safeUrl(s.bit_url)) {
-      btns.push(`<a class="btn btn-bit" href="${esc(safeUrl(s.bit_url))}" target="_blank" rel="noopener">${esc(s.bit_label || 'תשלום ב-Bit')}</a>`);
     }
     if (!btns.length) btns.push('<p class="hint" style="text-align:center">נציג יחזור אליכם בהקדם לתיאום התשלום והמשלוח.</p>');
     $('#doneActions').innerHTML = btns.join('');
@@ -685,7 +729,6 @@
     Object.keys(c).forEach(k => c[k] = String(c[k]).trim());
     err.textContent = '';
     if (!c.name || !c.phone || !c.address) { err.textContent = 'יש למלא שם, טלפון וכתובת.'; return; }
-    if (c.email && !form.email.checkValidity()) { err.textContent = 'כתובת המייל אינה תקינה.'; return; }
 
     btn.disabled = true; btn.textContent = 'שולח…';
     const items = state.cart.map(i => ({ ...i }));
@@ -694,11 +737,10 @@
       p_items: items.map(i => ({ product_id: i.id, quantity: i.qty }))
     });
     btn.disabled = false; btn.textContent = 'שליחת הזמנה';
-    if (error) { err.textContent = 'לא הצלחנו לשלוח את ההזמנה: ' + (error.message || 'נסו שוב'); return; }
+    if (error) { err.textContent = 'לא הצלחנו לשלוח את ההזמנה.'; return; }
 
     const order = Array.isArray(data) ? data[0] : data;
     db.functions.invoke('send-order-email', { body: { order_id: order.out_order_id } }).then(() => {}, () => {});
-
     state.cart = []; saveCart(); renderCart(); form.reset();
     renderDone(order, c, items);
     setStep('done');
@@ -727,7 +769,6 @@
         state.isAdmin = false;
         $('#adminBtn').style.display = 'none';
         renderAccount(); 
-        // חזרה אוטומטית לחנות אם המנהל מתנתק בזמן שהוא בדף ניהול
         $('#adminView').style.display = 'none';
         $('#shopView').style.display = 'block';
       };
@@ -752,13 +793,34 @@
   }
   $('#accountBtn').addEventListener('click', async () => { await renderAccount(); $('#accountDialog').showModal(); });
 
-  /* --- מסך ניהול חנות פנימי --- */
-  function renderAdminTable() {
+  /* --- מסך ניהול פנימי: טאבים --- */
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+      e.target.classList.add('active');
+      $('#adminTab-' + e.target.dataset.tab).style.display = 'block';
+    });
+  });
+
+  $('#adminBtn').addEventListener('click', () => {
+    $('#shopView').style.display = 'none';
+    $('#adminView').style.display = 'block';
+    renderAdminProducts();
+    renderAdminCategories();
+    populateAdminSettings();
+  });
+  $('#adminBackBtn').addEventListener('click', () => {
+    $('#adminView').style.display = 'none';
+    $('#shopView').style.display = 'block';
+  });
+
+  /* --- ניהול: מוצרים --- */
+  function renderAdminProducts() {
     $('#adminTbody').innerHTML = state.products.map(p => {
       const saleText = p.sale_price ? money(p.sale_price) : '-';
       const stockText = p.in_stock ? '<span style="color:green; font-weight:bold;">כן</span>' : '<span style="color:red;">לא</span>';
-      return `
-      <tr>
+      return `<tr>
         <td><img src="${esc(p.image_url || PLACEHOLDER)}" class="table-img" onerror="this.onerror=null;this.src='${PLACEHOLDER.replace(/'/g, '%27')}'"></td>
         <td style="font-weight:bold;">${esc(p.name)}</td>
         <td>${money(p.price)}</td>
@@ -774,37 +836,20 @@
     }).join('');
   }
 
-  // מעבר בין דף הבית לדף ניהול
-  $('#adminBtn').addEventListener('click', () => {
-    $('#shopView').style.display = 'none';
-    $('#adminView').style.display = 'block';
-    renderAdminTable(); // מרנדר את טבלת הניהול בהתבסס על המוצרים הקיימים בסטייט
-  });
-  
-  $('#adminBackBtn').addEventListener('click', () => {
-    $('#adminView').style.display = 'none';
-    $('#shopView').style.display = 'block';
-  });
-
-  // הוספת מוצר חדש
   $('#adminAddBtn').addEventListener('click', () => {
-    const form = $('#adminProductForm');
-    form.reset();
+    $('#adminProductForm').reset();
     $('#ap_id').value = '';
     $('#adminProdTitle').textContent = 'הוספת מוצר חדש';
     $('#adminProductDialog').showModal();
   });
 
-  // עריכה/מחיקה מתוך הטבלה
   $('#adminTbody').addEventListener('click', async (e) => {
     const editBtn = e.target.closest('[data-edit]');
     const delBtn = e.target.closest('[data-del]');
-    
     if (editBtn) {
       const p = state.products.find(x => x.id === editBtn.dataset.edit);
       if (!p) return;
-      const form = $('#adminProductForm');
-      form.reset();
+      $('#adminProductForm').reset();
       $('#ap_id').value = p.id;
       $('#ap_name').value = p.name || '';
       $('#ap_desc').value = p.description || '';
@@ -813,63 +858,135 @@
       $('#ap_sale_price').value = p.sale_price || '';
       $('#ap_image_url').value = p.image_url || '';
       $('#ap_stock').value = p.in_stock ? 'true' : 'false';
-      
       $('#adminProdTitle').textContent = 'עריכת מוצר';
       $('#adminProductDialog').showModal();
     }
-    
     if (delBtn) {
-      if (!confirm('האם אתה בטוח שברצונך למחוק מוצר זה מהחנות? (הוא יוסר מהאתר אך ישמר בהיסטוריה)')) return;
-      
-      const pId = delBtn.dataset.del;
-      const { error } = await db.from('products').update({ is_active: false }).eq('id', pId);
-      if (error) alert('אירעה שגיאה במחיקת המוצר: ' + error.message);
-      else {
-        await loadProducts(); // טוען מחדש מוצרים (מסנן את הפעילים בלבד)
-        renderAdminTable(); // מרענן את טבלת הניהול
-      }
+      if (!confirm('למחוק מוצר זה מהחנות?')) return;
+      const { error } = await db.from('products').update({ is_active: false }).eq('id', delBtn.dataset.del);
+      if (error) alert('שגיאה: ' + error.message);
+      else { await loadProducts(); renderAdminProducts(); }
     }
   });
 
-  // שמירת מוצר (הוספה/עריכה)
   $('#adminProductForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = $('#adminSaveBtn');
     btn.disabled = true; btn.textContent = 'שומר...';
-
     const p_id = $('#ap_id').value;
     const saleVal = $('#ap_sale_price').value;
-    
     const payload = {
-      name: $('#ap_name').value.trim(),
-      description: $('#ap_desc').value.trim() || null,
-      price: parseFloat($('#ap_price').value),
-      sale_price: saleVal ? parseFloat(saleVal) : null,
-      image_url: $('#ap_image_url').value.trim() || null,
-      in_stock: $('#ap_stock').value === 'true',
-      category_id: $('#ap_category').value || null,
-      is_active: true
+      name: $('#ap_name').value.trim(), description: $('#ap_desc').value.trim() || null,
+      price: parseFloat($('#ap_price').value), sale_price: saleVal ? parseFloat(saleVal) : null,
+      image_url: $('#ap_image_url').value.trim() \vert{}\vert{} null, in_stock: $('#ap_stock').value === 'true',
+      category_id: $('#ap_category').value || null, is_active: true
     };
-
     let error;
-    if (p_id) {
-      // עריכה
-      const res = await db.from('products').update(payload).eq('id', p_id);
-      error = res.error;
-    } else {
-      // הוספה
-      const res = await db.from('products').insert([payload]);
-      error = res.error;
-    }
-
+    if (p_id) { const res = await db.from('products').update(payload).eq('id', p_id); error = res.error; } 
+    else { const res = await db.from('products').insert([payload]); error = res.error; }
     btn.disabled = false; btn.textContent = 'שמירת מוצר';
+    if (error) alert('שגיאה: ' + error.message);
+    else { $('#adminProductDialog').close(); await loadProducts(); renderAdminProducts(); }
+  });
+
+  /* --- ניהול: קטגוריות --- */
+  function renderAdminCategories() {
+    $('#adminCatTbody').innerHTML = state.categories.map(c => `<tr>
+        <td style="font-weight:bold;">${esc(c.name)}</td>
+        <td dir="ltr" style="text-align:right;">${esc(c.slug)}</td>
+        <td>${c.sort_order || 0}</td>
+        <td>
+          <div class="admin-actions">
+            <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.8rem;" data-edit-cat="${esc(c.id)}">ערוך</button>
+            <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.8rem; color:red; border-color:red;" data-del-cat="${esc(c.id)}">מחק</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  $('#adminAddCatBtn').addEventListener('click', () => {
+    $('#adminCatForm').reset();
+    $('#ac_id').value = '';
+    $('#adminCatTitle').textContent = 'הוספת קטגוריה חדשה';
+    $('#adminCatDialog').showModal();
+  });
+
+  $('#adminCatTbody').addEventListener('click', async (e) => {
+    const editBtn = e.target.closest('[data-edit-cat]');
+    const delBtn = e.target.closest('[data-del-cat]');
+    if (editBtn) {
+      const c = state.categories.find(x => x.id == editBtn.dataset.editCat);
+      if(!c) return;
+      $('#adminCatForm').reset();
+      $('#ac_id').value = c.id; $('#ac_name').value = c.name \vert{}\vert{} ''; $('#ac_slug').value = c.slug || '';
+      $('#ac_desc').value = c.description \vert{}\vert{} ''; $('#ac_sort').value = c.sort_order || 0;
+      $('#adminCatTitle').textContent = 'עריכת קטגוריה';
+      $('#adminCatDialog').showModal();
+    }
+    if (delBtn) {
+      if (!confirm('למחוק קטגוריה זו? המוצרים שבה לא יימחקו, אבל לא יהיו תחת קטגוריה זו יותר.')) return;
+      const { error } = await db.from('categories').update({ is_active: false }).eq('id', delBtn.dataset.delCat);
+      if (error) alert('שגיאה: ' + error.message);
+      else { await loadCategories(); renderAdminCategories(); }
+    }
+  });
+
+  $('#adminCatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#adminSaveCatBtn');
+    btn.disabled = true; btn.textContent = 'שומר...';
+    const c_id = $('#ac_id').value;
+    const payload = {
+      name: $('#ac_name').value.trim(), slug: $('#ac_slug').value.trim(),
+      description: $('#ac_desc').value.trim(), sort_order: parseInt($('#ac_sort').value) || 0, is_active: true
+    };
+    let error;
+    if (c_id) { const res = await db.from('categories').update(payload).eq('id', c_id); error = res.error; } 
+    else { const res = await db.from('categories').insert([payload]); error = res.error; }
+    btn.disabled = false; btn.textContent = 'שמירת קטגוריה';
+    if (error) alert('שגיאה: ' + error.message);
+    else { $('#adminCatDialog').close(); await loadCategories(); renderAdminCategories(); }
+  });
+
+  /* --- ניהול: הגדרות ותקנונים --- */
+  function populateAdminSettings() {
+    const s = state.settings;
+    $('#set_store_name').value = s.store_name || '';
+    $('#set_store_phone').value = s.store_phone || '';
+    $('#set_store_address').value = s.store_address || '';
+    $('#set_opening_hours').value = s.opening_hours || '';
+    $('#set_order_email').value = s.order_email || '';
+    $('#set_whatsapp_number').value = s.whatsapp_number || '';
+    $('#set_shipping_policy').value = s.shipping_policy || '';
+    $('#set_return_policy').value = s.return_policy || '';
+    $('#set_terms').value = s.terms || '';
+  }
+
+  $('#adminSettingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#adminSaveSettingsBtn');
+    btn.disabled = true; btn.textContent = 'שומר...';
     
-    if (error) {
-      alert('אירעה שגיאה: ' + error.message);
-    } else {
-      $('#adminProductDialog').close();
-      await loadProducts();
-      renderAdminTable();
+    const updates = [
+      { key: 'store_name', value: $('#set_store_name').value.trim() },
+      { key: 'store_phone', value: $('#set_store_phone').value.trim() },
+      { key: 'store_address', value: $('#set_store_address').value.trim() },
+      { key: 'opening_hours', value: $('#set_opening_hours').value.trim() },
+      { key: 'order_email', value: $('#set_order_email').value.trim() },
+      { key: 'whatsapp_number', value: $('#set_whatsapp_number').value.trim() },
+      { key: 'shipping_policy', value: $('#set_shipping_policy').value.trim() },
+      { key: 'return_policy', value: $('#set_return_policy').value.trim() },
+      { key: 'terms', value: $('#set_terms').value.trim() }
+    ];
+    
+    // מעדכן את מסד הנתונים
+    const { error } = await db.from('settings').upsert(updates, { onConflict: 'key' });
+    btn.disabled = false; btn.textContent = 'שמירת הגדרות';
+    
+    if (error) alert('שגיאה בשמירה: ' + error.message);
+    else {
+      alert('ההגדרות נשמרו בהצלחה! האתר יתעדכן מיד.');
+      await loadSettings(); 
     }
   });
 
@@ -912,7 +1029,6 @@
   (async function init() {
     $('#searchInput').value = state.query;
     renderCart();
-    // בודק סשן במקביל לשאר הדברים כדי שיוכל לזהות אם המשתמש הוא מנהל
     renderAccount();
     await Promise.all([loadSettings(), loadCategories()]);
     await loadProducts();
